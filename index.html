@@ -1,259 +1,196 @@
-<!DOCTYPE html>
+<!doctype html>
 <html lang="en">
 <head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Tairova | Business Manager</title>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Tairova Business</title>
 <style>
-*{box-sizing:border-box}
-body{margin:0;font-family:Arial,sans-serif;background:#f4f7fb;color:#172033}
-header{background:#102c24;color:white;padding:22px 18px}
-header h1{margin:0;font-size:27px}
-header p{margin:7px 0 0;color:#c8e8d8;font-size:14px}
-main{max-width:950px;margin:auto;padding:18px}
-h2{font-size:19px;margin-top:8px}
-.stats{display:grid;grid-template-columns:repeat(2,1fr);gap:12px}
-.card{background:white;padding:17px;border-radius:13px;margin-bottom:13px;box-shadow:0 2px 8px #102c2410}
-.stat-label{font-size:13px;color:#64748b}
-.stat-value{font-size:22px;font-weight:bold;margin-top:9px;overflow-wrap:anywhere}
-.green{color:#13834b}
-form{display:grid;gap:10px}
-input,select,button{width:100%;padding:12px;border-radius:8px;font-size:15px}
-input,select{border:1px solid #d7deea;background:white}
-button{border:0;background:#14784d;color:white;font-weight:bold;cursor:pointer}
-button:active{opacity:.8}
-.secondary{background:#e7f3ec;color:#145b3c}
-.danger{background:#fff0f0;color:#a32626;padding:7px}
-table{width:100%;border-collapse:collapse;font-size:13px}
-th,td{text-align:left;padding:10px 5px;border-bottom:1px solid #edf0f4}
-th{color:#64748b}
-.table-wrap{overflow-x:auto}
-.empty{color:#64748b;font-size:14px;padding:10px 0}
-.notice{background:#e7f3ec;color:#145b3c;padding:12px;border-radius:9px;font-size:13px;line-height:1.5}
-footer{text-align:center;color:#64748b;font-size:12px;padding:25px}
-@media(min-width:650px){.stats{grid-template-columns:repeat(4,1fr)}.layout{display:grid;grid-template-columns:1fr 1fr;gap:15px}}
+:root{--ink:#17211b;--muted:#68746c;--line:#e1e8e2;--brand:#176b4d;--bg:#f5f8f5;--card:#fff;--warn:#8a4b00}
+*{box-sizing:border-box}body{margin:0;font-family:system-ui,-apple-system,Segoe UI,Roboto,Arial,sans-serif;color:var(--ink);background:var(--bg)}
+header{background:#103d2e;color:#fff;padding:22px 18px}header .wrap{max-width:1050px;margin:auto}h1{margin:0;font-size:1.7rem}header p{margin:5px 0 0;color:#d9eee2}
+main{max-width:1050px;margin:22px auto;padding:0 14px 40px}.card{background:var(--card);border:1px solid var(--line);border-radius:14px;padding:18px;margin:14px 0;box-shadow:0 3px 14px #183b2510}
+h2{font-size:1.1rem;margin:0 0 12px}.grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(210px,1fr));gap:12px}
+label{display:block;font-size:.88rem;font-weight:650;margin:8px 0 4px}input,select,button{font:inherit}input,select{width:100%;padding:10px;border:1px solid #cbd7cd;border-radius:8px;background:#fff}
+button{border:0;border-radius:9px;padding:10px 14px;background:var(--brand);color:#fff;font-weight:700;cursor:pointer;margin:8px 6px 0 0}button.secondary{background:#e7f1ea;color:#174b36}button.danger{background:#8b3434}
+small,.muted{color:var(--muted)}.notice{padding:11px 13px;border-radius:9px;background:#eef6f0;margin:10px 0}.warning{background:#fff3df;color:#714000}
+.hidden{display:none!important}.stats{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:10px}.stat{background:#edf5ef;border-radius:10px;padding:14px}.stat span{display:block;color:var(--muted);font-size:.85rem}.stat strong{font-size:1.35rem}
+table{width:100%;border-collapse:collapse;margin-top:8px;font-size:.92rem}th,td{text-align:left;border-bottom:1px solid var(--line);padding:9px 6px}th{color:var(--muted)}.tablewrap{overflow-x:auto}
+footer{text-align:center;color:var(--muted);font-size:.82rem;padding:12px}
 </style>
 </head>
 <body>
-<header>
-  <h1>🌿 Tairova</h1>
-  <p>Your business. Your numbers. Your growth.</p>
-</header>
-
+<header><div class="wrap"><h1>Tairova Business</h1><p>Inventory, sales and expenses in one workspace</p></div></header>
 <main>
-  <div class="notice">
-    Welcome to Tairova! Start by adding your products, then record sales and expenses.
-  </div>
+<div class="card warning">
+<strong>Setup required:</strong> Add your Supabase Project URL and publishable key in the configuration fields below. This app requires the SQL setup in <code>supabase_setup.sql</code>. Do not enter a secret/service-role key here.
+</div>
 
-  <h2>Business overview</h2>
-  <section class="stats">
-    <div class="card"><div class="stat-label">Sales revenue</div><div class="stat-value green" id="revenue">₦0</div></div>
-    <div class="card"><div class="stat-label">Gross profit</div><div class="stat-value" id="profit">₦0</div></div>
-    <div class="card"><div class="stat-label">Expenses</div><div class="stat-value" id="expenses">₦0</div></div>
-    <div class="card"><div class="stat-label">Products</div><div class="stat-value" id="productCount">0</div></div>
-  </section>
+<section class="card" id="configCard">
+<h2>1. Connect your cloud database</h2>
+<div class="grid">
+<div><label for="projectUrl">Supabase Project URL</label><input id="projectUrl" placeholder="https://your-project.supabase.co" autocomplete="off"></div>
+<div><label for="publishableKey">Supabase publishable key</label><input id="publishableKey" placeholder="sb_publishable_..." autocomplete="off"></div>
+</div>
+<button id="connectBtn">Connect</button><button class="secondary" id="forgetConfigBtn">Clear saved connection</button>
+<p class="muted">Connection details are saved only in this browser's local storage. Use only a publishable key, never a secret or service-role key.</p>
+<div id="configStatus" role="status"></div>
+</section>
 
-  <div class="layout">
-    <section>
-      <div class="card">
-        <h2>Add a product</h2>
-        <form id="productForm">
-          <input id="productName" placeholder="Product name" required>
-          <input id="cost" type="number" min="0.01" step="0.01" placeholder="Cost price per item (₦)" required>
-          <input id="price" type="number" min="0.01" step="0.01" placeholder="Selling price per item (₦)" required>
-          <input id="quantity" type="number" min="0" step="1" placeholder="Opening stock quantity" required>
-          <button type="submit">Add product</button>
-        </form>
-      </div>
+<section class="card hidden" id="authCard">
+<h2>2. Sign in or create your account</h2>
+<div class="grid">
+<div><label for="email">Email</label><input id="email" type="email" autocomplete="email"></div>
+<div><label for="password">Password</label><input id="password" type="password" autocomplete="current-password"></div>
+</div>
+<button id="signInBtn">Sign in</button><button class="secondary" id="signUpBtn">Create account</button><button class="secondary hidden" id="signOutBtn">Sign out</button>
+<p class="muted">Use an email you control. Depending on your Supabase settings, you may need to confirm your email before signing in.</p>
+<div id="authStatus" role="status"></div>
+</section>
 
-      <div class="card">
-        <h2>Record a sale</h2>
-        <form id="saleForm">
-          <select id="saleProduct" required>
-            <option value="">Choose a product</option>
-          </select>
-          <input id="saleQuantity" type="number" min="1" step="1" placeholder="Quantity sold" required>
-          <button type="submit">Record sale</button>
-        </form>
-      </div>
+<section id="appArea" class="hidden">
+<div class="card">
+<h2>3. Business overview</h2>
+<div class="stats">
+<div class="stat"><span>Products</span><strong id="productCount">0</strong></div>
+<div class="stat"><span>Stock units</span><strong id="stockCount">0</strong></div>
+<div class="stat"><span>Recorded sales</span><strong id="salesTotal">₦0.00</strong></div>
+<div class="stat"><span>Recorded expenses</span><strong id="expenseTotal">₦0.00</strong></div>
+</div>
+<p class="muted">Totals reflect records available to the signed-in user. They are not accounting advice or a substitute for verified records.</p>
+</div>
 
-      <div class="card">
-        <h2>Record an expense</h2>
-        <form id="expenseForm">
-          <input id="expenseName" placeholder="Expense description" required>
-          <input id="expenseAmount" type="number" min="0.01" step="0.01" placeholder="Amount (₦)" required>
-          <button type="submit">Save expense</button>
-        </form>
-      </div>
-    </section>
+<div class="card">
+<h2>Add a product</h2>
+<div class="grid">
+<div><label for="pName">Product name</label><input id="pName" maxlength="120"></div>
+<div><label for="pSku">SKU (optional)</label><input id="pSku" maxlength="80"></div>
+<div><label for="pQty">Opening quantity</label><input id="pQty" type="number" min="0" step="1" value="0"></div>
+<div><label for="pCost">Cost price (₦)</label><input id="pCost" type="number" min="0" step="0.01" value="0"></div>
+<div><label for="pPrice">Selling price (₦)</label><input id="pPrice" type="number" min="0" step="0.01" value="0"></div>
+</div><button id="addProductBtn">Save product</button>
+<div id="productStatus" role="status"></div>
+<div class="tablewrap"><table><thead><tr><th>Product</th><th>SKU</th><th>Qty</th><th>Cost</th><th>Price</th></tr></thead><tbody id="productsBody"></tbody></table></div>
+</div>
 
-    <section>
-      <div class="card">
-        <h2>Inventory</h2>
-        <div class="table-wrap">
-          <table>
-            <thead><tr><th>Product</th><th>Price</th><th>Stock</th></tr></thead>
-            <tbody id="inventory"></tbody>
-          </table>
-        </div>
-        <p id="inventoryEmpty" class="empty">No products yet. Add your first product above.</p>
-      </div>
+<div class="card">
+<h2>Record a sale</h2>
+<div class="grid">
+<div><label for="saleProduct">Product</label><select id="saleProduct"></select></div>
+<div><label for="saleQty">Quantity sold</label><input id="saleQty" type="number" min="1" step="1" value="1"></div>
+</div><button id="recordSaleBtn">Record sale and deduct stock</button>
+<div id="saleStatus" role="status"></div>
+<div class="tablewrap"><table><thead><tr><th>Sale ID</th><th>Date</th><th>Total</th></tr></thead><tbody id="salesBody"></tbody></table></div>
+</div>
 
-      <div class="card">
-        <h2>Recent sales</h2>
-        <div class="table-wrap">
-          <table>
-            <thead><tr><th>Product</th><th>Qty</th><th>Total</th></tr></thead>
-            <tbody id="salesList"></tbody>
-          </table>
-        </div>
-        <p id="salesEmpty" class="empty">Your recorded sales will appear here.</p>
-      </div>
-
-      <div class="card">
-        <h2>Recent expenses</h2>
-        <div id="expenseList" class="empty">Your recorded expenses will appear here.</div>
-      </div>
-    </section>
-  </div>
-
-  <footer>© 2026 Tairova. Built to help businesses grow.</footer>
+<div class="card">
+<h2>Record an expense</h2>
+<div class="grid">
+<div><label for="eDesc">Description</label><input id="eDesc" maxlength="200" placeholder="Electricity, transport, etc."></div>
+<div><label for="eAmount">Amount (₦)</label><input id="eAmount" type="number" min="0.01" step="0.01"></div>
+<div><label for="eDate">Date</label><input id="eDate" type="date"></div>
+</div><button id="addExpenseBtn">Save expense</button>
+<div id="expenseStatus" role="status"></div>
+<div class="tablewrap"><table><thead><tr><th>Date</th><th>Description</th><th>Amount</th></tr></thead><tbody id="expensesBody"></tbody></table></div>
+</div>
+</section>
+<footer>Tairova • Early cloud-connected starter • Test before using for live business records</footer>
 </main>
 
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <script>
-const KEY = "tairova_demo_v1";
-let data = {products:[], sales:[], expenses:[]};
-
-try {
-  const saved = localStorage.getItem(KEY);
-  if (saved) {
-    const parsed = JSON.parse(saved);
-    if (parsed && Array.isArray(parsed.products) &&
-        Array.isArray(parsed.sales) && Array.isArray(parsed.expenses)) {
-      data = parsed;
-    }
-  }
-} catch(e) {}
-
-const money = n => "₦" + Number(n).toLocaleString("en-NG", {
-  minimumFractionDigits:2, maximumFractionDigits:2
-});
-const el = id => document.getElementById(id);
-
-function save() {
-  try {
-    localStorage.setItem(KEY, JSON.stringify(data));
-    render();
-  } catch(e) {
-    alert("Could not save on this device. Please check browser storage.");
-  }
+(() => {
+const $ = id => document.getElementById(id);
+let supabase = null, currentProducts = [];
+const naira = value => new Intl.NumberFormat('en-NG',{style:'currency',currency:'NGN'}).format(Number(value || 0));
+const say = (id,msg,kind='') => { const el=$(id); el.textContent=msg; el.className=kind==='error'?'notice warning':'notice'; };
+const show = (id,on=true) => $(id).classList.toggle('hidden',!on);
+function savedConfig(){ try{return JSON.parse(localStorage.getItem('tairova_supabase_config')||'{}')}catch{return {}} }
+function setConnection(on){show('authCard',on);show('appArea',false);show('signOutBtn',false);}
+async function connect(){
+ const url=$('projectUrl').value.trim().replace(/\/+$/,'');
+ const key=$('publishableKey').value.trim();
+ if(!/^https:\/\/[a-zA-Z0-9.-]+\.supabase\.co$/.test(url)){say('configStatus','Please enter the full Supabase Project URL, starting with https:// and ending with .supabase.co.','error');return}
+ if(!key || key.toLowerCase().includes('service_role') || key.toLowerCase().includes('secret')){say('configStatus','Enter the publishable key only. Never use a secret or service-role key here.','error');return}
+ try{
+   supabase=window.supabase.createClient(url,key);
+   localStorage.setItem('tairova_supabase_config',JSON.stringify({url,key}));
+   say('configStatus','Connection details saved. Now sign in or create an account.');
+   setConnection(true);
+   const {data:{session}}=await supabase.auth.getSession();
+   if(session) await signedIn();
+ }catch(e){say('configStatus','Could not initialize the connection. Check the URL and key.','error')}
 }
-
-function render() {
-  const revenue = data.sales.reduce((s,x)=>s+x.total,0);
-  const grossProfit = data.sales.reduce((s,x)=>s+x.profit,0);
-  const expenses = data.expenses.reduce((s,x)=>s+x.amount,0);
-
-  el("revenue").textContent = money(revenue);
-  el("profit").textContent = money(grossProfit-expenses);
-  el("expenses").textContent = money(expenses);
-  el("productCount").textContent = data.products.length;
-
-  el("inventory").innerHTML = data.products.map(p =>
-    `<tr><td>${escapeHTML(p.name)}</td><td>${money(p.price)}</td><td>${p.stock}</td></tr>`
-  ).join("");
-  el("inventoryEmpty").style.display = data.products.length ? "none":"block";
-
-  el("saleProduct").innerHTML = '<option value="">Choose a product</option>' +
-    data.products.filter(p=>p.stock>0).map(p =>
-      `<option value="${p.id}">${escapeHTML(p.name)} — ${p.stock} available</option>`
-    ).join("");
-
-  el("salesList").innerHTML = data.sales.slice().reverse().slice(0,8).map(s =>
-    `<tr><td>${escapeHTML(s.name)}</td><td>${s.qty}</td><td>${money(s.total)}</td></tr>`
-  ).join("");
-  el("salesEmpty").style.display = data.sales.length ? "none":"block";
-
-  el("expenseList").innerHTML = data.expenses.slice().reverse().slice(0,8).map(e =>
-    `<p>${escapeHTML(e.name)} — <strong>${money(e.amount)}</strong></p>`
-  ).join("") || "Your recorded expenses will appear here.";
+async function signedIn(){
+ show('appArea',true);show('signOutBtn',true);
+ say('authStatus','Signed in successfully.');
+ await refreshAll();
 }
-
-function escapeHTML(value) {
-  return String(value).replace(/[&<>"']/g, c => ({
-    "&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"
-  })[c]);
+async function auth(action){
+ if(!supabase){say('authStatus','Connect to Supabase first.','error');return}
+ const email=$('email').value.trim(), password=$('password').value;
+ if(!email || password.length<8){say('authStatus','Enter your email and a password with at least 8 characters.','error');return}
+ let result;
+ if(action==='signup') result=await supabase.auth.signUp({email,password});
+ else result=await supabase.auth.signInWithPassword({email,password});
+ if(result.error){say('authStatus',result.error.message,'error');return}
+ if(action==='signup' && !result.data.session){say('authStatus','Account created. Check your email for a confirmation link, then sign in.');return}
+ await signedIn();
 }
-
-el("productForm").addEventListener("submit", e => {
-  e.preventDefault();
-  const name = el("productName").value.trim();
-  const cost = Number(el("cost").value);
-  const price = Number(el("price").value);
-  const stock = Number(el("quantity").value);
-
-  if (!name || !Number.isFinite(cost) || !Number.isFinite(price) ||
-      !Number.isSafeInteger(stock) || cost<=0 || price<=0 || stock<0) {
-    alert("Enter a valid product name, prices and whole-number stock.");
-    return;
-  }
-
-  data.products.push({
-    id: (crypto.randomUUID ? crypto.randomUUID() : String(Date.now())+Math.random()),
-    name, cost, price, stock
-  });
-  save();
-  e.target.reset();
-  alert("Product added successfully!");
-});
-
-el("saleForm").addEventListener("submit", e => {
-  e.preventDefault();
-  const product = data.products.find(p=>p.id===el("saleProduct").value);
-  const qty = Number(el("saleQuantity").value);
-
-  if (!product || !Number.isSafeInteger(qty) || qty<1) {
-    alert("Choose a product and enter a whole-number quantity.");
-    return;
-  }
-  if (qty>product.stock) {
-    alert("Not enough stock available for this sale.");
-    return;
-  }
-
-  const total = product.price * qty;
-  const profit = (product.price-product.cost)*qty;
-  if (!Number.isFinite(total) || !Number.isFinite(profit)) {
-    alert("Could not calculate this sale.");
-    return;
-  }
-
-  product.stock -= qty;
-  data.sales.push({
-    id: Date.now(), name:product.name, qty, total, profit,
-    date:new Date().toISOString()
-  });
-  save();
-  e.target.reset();
-  alert("Sale recorded and stock updated!");
-});
-
-el("expenseForm").addEventListener("submit", e => {
-  e.preventDefault();
-  const name = el("expenseName").value.trim();
-  const amount = Number(el("expenseAmount").value);
-
-  if (!name || !Number.isFinite(amount) || amount<=0) {
-    alert("Enter a description and a valid expense amount.");
-    return;
-  }
-  data.expenses.push({name, amount, date:new Date().toISOString()});
-  save();
-  e.target.reset();
-  alert("Expense saved!");
-});
-
-render();
+async function refreshAll(){
+ const uid=(await supabase.auth.getUser()).data.user?.id;
+ if(!uid){show('appArea',false);return}
+ const [pr,sa,ex]=await Promise.all([
+   supabase.from('products').select('id,name,sku,quantity,cost_price,selling_price,created_at').order('created_at',{ascending:false}),
+   supabase.from('sales').select('id,total_amount,created_at').order('created_at',{ascending:false}).limit(50),
+   supabase.from('expenses').select('id,description,amount,expense_date,created_at').order('expense_date',{ascending:false}).limit(100)
+ ]);
+ for(const r of [pr,sa,ex]) if(r.error){say('authStatus','Database query failed: '+r.error.message,'error');return}
+ currentProducts=pr.data||[];
+ $('productCount').textContent=currentProducts.length;
+ $('stockCount').textContent=currentProducts.reduce((s,p)=>s+Number(p.quantity),0);
+ $('salesTotal').textContent=naira((sa.data||[]).reduce((s,r)=>s+Number(r.total_amount),0));
+ $('expenseTotal').textContent=naira((ex.data||[]).reduce((s,r)=>s+Number(r.amount),0));
+ $('productsBody').innerHTML=currentProducts.map(p=>`<tr><td>${escapeHtml(p.name)}</td><td>${escapeHtml(p.sku||'—')}</td><td>${p.quantity}</td><td>${naira(p.cost_price)}</td><td>${naira(p.selling_price)}</td></tr>`).join('')||'<tr><td colspan="5">No products yet.</td></tr>';
+ $('saleProduct').innerHTML=currentProducts.map(p=>`<option value="${p.id}">${escapeHtml(p.name)} — ${p.quantity} available (${naira(p.selling_price)})</option>`).join('')||'<option value="">Add a product first</option>';
+ $('salesBody').innerHTML=(sa.data||[]).map(s=>`<tr><td>${s.id}</td><td>${new Date(s.created_at).toLocaleString()}</td><td>${naira(s.total_amount)}</td></tr>`).join('')||'<tr><td colspan="3">No sales yet.</td></tr>';
+ $('expensesBody').innerHTML=(ex.data||[]).map(e=>`<tr><td>${escapeHtml(e.expense_date)}</td><td>${escapeHtml(e.description)}</td><td>${naira(e.amount)}</td></tr>`).join('')||'<tr><td colspan="3">No expenses yet.</td></tr>';
+}
+function escapeHtml(v){return String(v).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]))}
+async function addProduct(){
+ const name=$('pName').value.trim(), sku=$('pSku').value.trim()||null, quantity=Number($('pQty').value), cost_price=Number($('pCost').value), selling_price=Number($('pPrice').value);
+ if(!name || !Number.isInteger(quantity)||quantity<0||cost_price<0||selling_price<0){say('productStatus','Enter a name, whole non-negative quantity, and non-negative prices.','error');return}
+ const user=(await supabase.auth.getUser()).data.user;
+ const {error}=await supabase.from('products').insert({user_id:user.id,name,sku,quantity,cost_price,selling_price});
+ if(error){say('productStatus','Could not save product: '+error.message,'error');return}
+ $('pName').value='';$('pSku').value='';$('pQty').value='0';$('pCost').value='0';$('pPrice').value='0';
+ say('productStatus','Product saved to the cloud.');await refreshAll();
+}
+async function recordSale(){
+ const productId=Number($('saleProduct').value), quantity=Number($('saleQty').value);
+ if(!productId||!Number.isInteger(quantity)||quantity<1){say('saleStatus','Choose a product and enter a whole quantity greater than zero.','error');return}
+ const {data,error}=await supabase.rpc('record_tairova_sale',{p_product_id:productId,p_quantity:quantity});
+ if(error){say('saleStatus','Sale was not recorded: '+error.message,'error');return}
+ say('saleStatus','Sale recorded and stock updated. Sale ID: '+data);await refreshAll();
+}
+async function addExpense(){
+ const description=$('eDesc').value.trim(), amount=Number($('eAmount').value), expense_date=$('eDate').value||new Date().toISOString().slice(0,10);
+ if(!description||!Number.isFinite(amount)||amount<=0){say('expenseStatus','Enter a description and an amount greater than zero.','error');return}
+ const user=(await supabase.auth.getUser()).data.user;
+ const {error}=await supabase.from('expenses').insert({user_id:user.id,description,amount,expense_date});
+ if(error){say('expenseStatus','Could not save expense: '+error.message,'error');return}
+ $('eDesc').value='';$('eAmount').value='';say('expenseStatus','Expense saved to the cloud.');await refreshAll();
+}
+$('connectBtn').addEventListener('click',connect);
+$('forgetConfigBtn').addEventListener('click',()=>{localStorage.removeItem('tairova_supabase_config');$('projectUrl').value='';$('publishableKey').value='';supabase=null;setConnection(false);say('configStatus','Saved connection details cleared.')});
+$('signInBtn').addEventListener('click',()=>auth('signin'));
+$('signUpBtn').addEventListener('click',()=>auth('signup'));
+$('signOutBtn').addEventListener('click',async()=>{await supabase.auth.signOut();show('appArea',false);show('signOutBtn',false);say('authStatus','Signed out.')});
+$('addProductBtn').addEventListener('click',addProduct);
+$('recordSaleBtn').addEventListener('click',recordSale);
+$('addExpenseBtn').addEventListener('click',addExpense);
+$('eDate').value=new Date().toISOString().slice(0,10);
+const cfg=savedConfig();if(cfg.url&&cfg.key){$('projectUrl').value=cfg.url;$('publishableKey').value=cfg.key}
+})();
 </script>
 </body>
 </html>
