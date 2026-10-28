@@ -1,0 +1,259 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Tairova | Business Manager</title>
+<style>
+*{box-sizing:border-box}
+body{margin:0;font-family:Arial,sans-serif;background:#f4f7fb;color:#172033}
+header{background:#102c24;color:white;padding:22px 18px}
+header h1{margin:0;font-size:27px}
+header p{margin:7px 0 0;color:#c8e8d8;font-size:14px}
+main{max-width:950px;margin:auto;padding:18px}
+h2{font-size:19px;margin-top:8px}
+.stats{display:grid;grid-template-columns:repeat(2,1fr);gap:12px}
+.card{background:white;padding:17px;border-radius:13px;margin-bottom:13px;box-shadow:0 2px 8px #102c2410}
+.stat-label{font-size:13px;color:#64748b}
+.stat-value{font-size:22px;font-weight:bold;margin-top:9px;overflow-wrap:anywhere}
+.green{color:#13834b}
+form{display:grid;gap:10px}
+input,select,button{width:100%;padding:12px;border-radius:8px;font-size:15px}
+input,select{border:1px solid #d7deea;background:white}
+button{border:0;background:#14784d;color:white;font-weight:bold;cursor:pointer}
+button:active{opacity:.8}
+.secondary{background:#e7f3ec;color:#145b3c}
+.danger{background:#fff0f0;color:#a32626;padding:7px}
+table{width:100%;border-collapse:collapse;font-size:13px}
+th,td{text-align:left;padding:10px 5px;border-bottom:1px solid #edf0f4}
+th{color:#64748b}
+.table-wrap{overflow-x:auto}
+.empty{color:#64748b;font-size:14px;padding:10px 0}
+.notice{background:#e7f3ec;color:#145b3c;padding:12px;border-radius:9px;font-size:13px;line-height:1.5}
+footer{text-align:center;color:#64748b;font-size:12px;padding:25px}
+@media(min-width:650px){.stats{grid-template-columns:repeat(4,1fr)}.layout{display:grid;grid-template-columns:1fr 1fr;gap:15px}}
+</style>
+</head>
+<body>
+<header>
+  <h1>🌿 Tairova</h1>
+  <p>Your business. Your numbers. Your growth.</p>
+</header>
+
+<main>
+  <div class="notice">
+    Welcome to Tairova! Start by adding your products, then record sales and expenses.
+  </div>
+
+  <h2>Business overview</h2>
+  <section class="stats">
+    <div class="card"><div class="stat-label">Sales revenue</div><div class="stat-value green" id="revenue">₦0</div></div>
+    <div class="card"><div class="stat-label">Gross profit</div><div class="stat-value" id="profit">₦0</div></div>
+    <div class="card"><div class="stat-label">Expenses</div><div class="stat-value" id="expenses">₦0</div></div>
+    <div class="card"><div class="stat-label">Products</div><div class="stat-value" id="productCount">0</div></div>
+  </section>
+
+  <div class="layout">
+    <section>
+      <div class="card">
+        <h2>Add a product</h2>
+        <form id="productForm">
+          <input id="productName" placeholder="Product name" required>
+          <input id="cost" type="number" min="0.01" step="0.01" placeholder="Cost price per item (₦)" required>
+          <input id="price" type="number" min="0.01" step="0.01" placeholder="Selling price per item (₦)" required>
+          <input id="quantity" type="number" min="0" step="1" placeholder="Opening stock quantity" required>
+          <button type="submit">Add product</button>
+        </form>
+      </div>
+
+      <div class="card">
+        <h2>Record a sale</h2>
+        <form id="saleForm">
+          <select id="saleProduct" required>
+            <option value="">Choose a product</option>
+          </select>
+          <input id="saleQuantity" type="number" min="1" step="1" placeholder="Quantity sold" required>
+          <button type="submit">Record sale</button>
+        </form>
+      </div>
+
+      <div class="card">
+        <h2>Record an expense</h2>
+        <form id="expenseForm">
+          <input id="expenseName" placeholder="Expense description" required>
+          <input id="expenseAmount" type="number" min="0.01" step="0.01" placeholder="Amount (₦)" required>
+          <button type="submit">Save expense</button>
+        </form>
+      </div>
+    </section>
+
+    <section>
+      <div class="card">
+        <h2>Inventory</h2>
+        <div class="table-wrap">
+          <table>
+            <thead><tr><th>Product</th><th>Price</th><th>Stock</th></tr></thead>
+            <tbody id="inventory"></tbody>
+          </table>
+        </div>
+        <p id="inventoryEmpty" class="empty">No products yet. Add your first product above.</p>
+      </div>
+
+      <div class="card">
+        <h2>Recent sales</h2>
+        <div class="table-wrap">
+          <table>
+            <thead><tr><th>Product</th><th>Qty</th><th>Total</th></tr></thead>
+            <tbody id="salesList"></tbody>
+          </table>
+        </div>
+        <p id="salesEmpty" class="empty">Your recorded sales will appear here.</p>
+      </div>
+
+      <div class="card">
+        <h2>Recent expenses</h2>
+        <div id="expenseList" class="empty">Your recorded expenses will appear here.</div>
+      </div>
+    </section>
+  </div>
+
+  <footer>© 2026 Tairova. Built to help businesses grow.</footer>
+</main>
+
+<script>
+const KEY = "tairova_demo_v1";
+let data = {products:[], sales:[], expenses:[]};
+
+try {
+  const saved = localStorage.getItem(KEY);
+  if (saved) {
+    const parsed = JSON.parse(saved);
+    if (parsed && Array.isArray(parsed.products) &&
+        Array.isArray(parsed.sales) && Array.isArray(parsed.expenses)) {
+      data = parsed;
+    }
+  }
+} catch(e) {}
+
+const money = n => "₦" + Number(n).toLocaleString("en-NG", {
+  minimumFractionDigits:2, maximumFractionDigits:2
+});
+const el = id => document.getElementById(id);
+
+function save() {
+  try {
+    localStorage.setItem(KEY, JSON.stringify(data));
+    render();
+  } catch(e) {
+    alert("Could not save on this device. Please check browser storage.");
+  }
+}
+
+function render() {
+  const revenue = data.sales.reduce((s,x)=>s+x.total,0);
+  const grossProfit = data.sales.reduce((s,x)=>s+x.profit,0);
+  const expenses = data.expenses.reduce((s,x)=>s+x.amount,0);
+
+  el("revenue").textContent = money(revenue);
+  el("profit").textContent = money(grossProfit-expenses);
+  el("expenses").textContent = money(expenses);
+  el("productCount").textContent = data.products.length;
+
+  el("inventory").innerHTML = data.products.map(p =>
+    `<tr><td>${escapeHTML(p.name)}</td><td>${money(p.price)}</td><td>${p.stock}</td></tr>`
+  ).join("");
+  el("inventoryEmpty").style.display = data.products.length ? "none":"block";
+
+  el("saleProduct").innerHTML = '<option value="">Choose a product</option>' +
+    data.products.filter(p=>p.stock>0).map(p =>
+      `<option value="${p.id}">${escapeHTML(p.name)} — ${p.stock} available</option>`
+    ).join("");
+
+  el("salesList").innerHTML = data.sales.slice().reverse().slice(0,8).map(s =>
+    `<tr><td>${escapeHTML(s.name)}</td><td>${s.qty}</td><td>${money(s.total)}</td></tr>`
+  ).join("");
+  el("salesEmpty").style.display = data.sales.length ? "none":"block";
+
+  el("expenseList").innerHTML = data.expenses.slice().reverse().slice(0,8).map(e =>
+    `<p>${escapeHTML(e.name)} — <strong>${money(e.amount)}</strong></p>`
+  ).join("") || "Your recorded expenses will appear here.";
+}
+
+function escapeHTML(value) {
+  return String(value).replace(/[&<>"']/g, c => ({
+    "&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"
+  })[c]);
+}
+
+el("productForm").addEventListener("submit", e => {
+  e.preventDefault();
+  const name = el("productName").value.trim();
+  const cost = Number(el("cost").value);
+  const price = Number(el("price").value);
+  const stock = Number(el("quantity").value);
+
+  if (!name || !Number.isFinite(cost) || !Number.isFinite(price) ||
+      !Number.isSafeInteger(stock) || cost<=0 || price<=0 || stock<0) {
+    alert("Enter a valid product name, prices and whole-number stock.");
+    return;
+  }
+
+  data.products.push({
+    id: (crypto.randomUUID ? crypto.randomUUID() : String(Date.now())+Math.random()),
+    name, cost, price, stock
+  });
+  save();
+  e.target.reset();
+  alert("Product added successfully!");
+});
+
+el("saleForm").addEventListener("submit", e => {
+  e.preventDefault();
+  const product = data.products.find(p=>p.id===el("saleProduct").value);
+  const qty = Number(el("saleQuantity").value);
+
+  if (!product || !Number.isSafeInteger(qty) || qty<1) {
+    alert("Choose a product and enter a whole-number quantity.");
+    return;
+  }
+  if (qty>product.stock) {
+    alert("Not enough stock available for this sale.");
+    return;
+  }
+
+  const total = product.price * qty;
+  const profit = (product.price-product.cost)*qty;
+  if (!Number.isFinite(total) || !Number.isFinite(profit)) {
+    alert("Could not calculate this sale.");
+    return;
+  }
+
+  product.stock -= qty;
+  data.sales.push({
+    id: Date.now(), name:product.name, qty, total, profit,
+    date:new Date().toISOString()
+  });
+  save();
+  e.target.reset();
+  alert("Sale recorded and stock updated!");
+});
+
+el("expenseForm").addEventListener("submit", e => {
+  e.preventDefault();
+  const name = el("expenseName").value.trim();
+  const amount = Number(el("expenseAmount").value);
+
+  if (!name || !Number.isFinite(amount) || amount<=0) {
+    alert("Enter a description and a valid expense amount.");
+    return;
+  }
+  data.expenses.push({name, amount, date:new Date().toISOString()});
+  save();
+  e.target.reset();
+  alert("Expense saved!");
+});
+
+render();
+</script>
+</body>
+</html>
